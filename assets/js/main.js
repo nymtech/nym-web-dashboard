@@ -2,7 +2,7 @@ function getTopology() {
   console.log("Getting topology...");
   $.ajax({
     type: 'GET',
-    url: 'http://directory.nymtech.net:8080/api/presence/topology',
+    url: 'https://directory.nymtech.net/api/presence/topology',
     success: function(data) {
       updateDom(data);
     }
