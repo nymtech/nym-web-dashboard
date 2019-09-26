@@ -50,4 +50,6 @@ function updateCocoNodes(cocoNodes) {
   });
 }
 
-getTopology();
+$(document).ready(function() {
+  getTopology();
+});
