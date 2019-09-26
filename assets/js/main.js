@@ -21,8 +21,8 @@ function updateMixNodes(mixNodes) {
       $('<td>').text(node.host),
       $('<td>').text(node.layer),
       $('<td>').text(node.pubKey),
-      $('<td>').text("0"),
-      $('<td>').text("0")
+      $('<td id="' + "received-" + node.pubKey.replace('=', '') + '">').text("0"),
+      $('<td id="' + "sent-" + node.pubKey.replace('=', '') + '">').text("0")
     ).appendTo('#mixnodes-list');
   });
 }
@@ -50,35 +50,23 @@ function updateCocoNodes(cocoNodes) {
   });
 }
 
-function connectWebSocket () {
+function connectWebSocket() {
   var conn;
-  var msg = document.getElementById("msg");
-  var log = document.getElementById("log");
-
-  function appendLog(item) {
-    var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-    log.appendChild(item);
-    if (doScroll) {
-      log.scrollTop = log.scrollHeight - log.clientHeight;
-    }
-  }
-
-  console.log("connecting to websocket");
   conn = new WebSocket("wss://directory.nymtech.net/ws");
-  conn.onopen = function(evt) {
-    console.log("Received evt: " + evt);
-  };
-  conn.onclose = function(evt) {
-    var item = document.createElement("div");
-    item.innerHTML = "<b>Connection closed.</b>";
-    appendLog(item);
-  };
   conn.onmessage = function(evt) {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
-      var item = document.createElement("div");
-      item.innerText = messages[i];
-      appendLog(item);
+      var msg = jQuery.parseJSON(messages[i]);
+      var recCell = "#received-" + msg.pubKey.replace('=', '');
+      $(recCell).html(msg.received);
+
+      var sentCell = "#sent-" + msg.pubKey.replace('=', '');
+      var sent = 0;
+      for (var key in msg.sent) {
+        s = msg.sent[key];
+        sent += s;
+      }
+      $(sentCell).html(sent);
     }
   };
 }
