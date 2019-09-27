@@ -36,9 +36,9 @@ function updateMixProviderNodes(mixProviderNodes) {
       clients[i] = c.pubKey;
     });
     var $tr = $('<tr>').append(
-      DOMPurify.sanitize($('<td>').text(node.host)),
-      DOMPurify.sanitize($('<td>').text(node.pubKey)),
-      DOMPurify.sanitize($('<td>').text(clients))
+      $('<td>').text(DOMPurify.sanitize(node.host)),
+      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
+      $('<td>').text(DOMPurify.sanitize(clients))
     ).appendTo('#mixprovidernodes-list');
   });
 }
@@ -46,8 +46,8 @@ function updateMixProviderNodes(mixProviderNodes) {
 function updateCocoNodes(cocoNodes) {
   $.each(cocoNodes, function(_, node) {
     var $tr = $('<tr>').append(
-      DOMPurify.sanitize($('<td>').text(node.host)),
-      DOMPurify.sanitize($('<td>').text(node.pubKey))
+      $('<td>').text(DOMPurify.sanitize(node.host)),
+      $('<td>').text(DOMPurify.sanitize(node.pubKey))
     ).appendTo('#coconodes-list');
   });
 }
@@ -59,10 +59,10 @@ function connectWebSocket() {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
       var msg = jQuery.parseJSON(messages[i]);
-      var recCell = DOMPurify.sanitize("#received-" + msg.pubKey.replace('=', ''));
+      var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
       $(recCell).html(DOMPurify.sanitize(msg.received));
 
-      var sentCell = DOMPurify.sanitize("#sent-" + msg.pubKey.replace('=', ''));
+      var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
       var sent = 0;
       for (var key in msg.sent) {
         s = msg.sent[key];
