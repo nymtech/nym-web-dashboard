@@ -10,9 +10,9 @@ function getTopology() {
 }
 
 function updateDom(data) {
-  updateMixNodes(data.MixNodes);
-  updateMixProviderNodes(data.MixProviderNodes);
-  updateCocoNodes(data.CocoNodes);
+  updateMixNodes(data.mixNodes);
+  updateMixProviderNodes(data.mixProviderNodes);
+  updateCocoNodes(data.cocoNodes);
 }
 
 function updateMixNodes(mixNodes) {
