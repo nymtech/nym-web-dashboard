@@ -66,7 +66,10 @@ function updateCocoNodes(cocoNodes) {
 
 function connectWebSocket() {
   var conn;
-  conn = new WebSocket("wss://" + directoryUrl() + "/ws");
+  var url;
+  url = "wss://" + directoryUrl() + "/ws";
+  console.log("connecting to: " + url);
+  conn = new WebSocket(url);
   conn.onmessage = function(evt) {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
