@@ -1,8 +1,17 @@
+function directoryUrl() {
+  if($(location).attr("href").startsWith("https://qa-dashboard")) {
+    return "qa-directory.nymtech.net";
+  } else {
+    return "directory.nymtech.net";
+  }
+}
+
 function getTopology() {
   console.log("Getting topology...");
+  var topologyUrl = "https://" + directoryUrl() + "/api/presence/topology";
   $.ajax({
     type: 'GET',
-    url: 'https://directory.nymtech.net/api/presence/topology',
+    url: topologyUrl,
     success: function(data) {
       updateDom(data);
     }
@@ -54,7 +63,7 @@ function updateCocoNodes(cocoNodes) {
 
 function connectWebSocket() {
   var conn;
-  conn = new WebSocket("wss://directory.nymtech.net/ws");
+  conn = new WebSocket("wss://" + directoryUrl() + "/ws");
   conn.onmessage = function(evt) {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
