@@ -36,7 +36,7 @@ function updateMixProviderNodes(mixProviderNodes) {
       clients[i] = c.pubKey;
     });
     var $tr = $('<tr>').append(
-      $('<td>').text(DOMPurify.sanitize(node.host)),
+      $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(clients))
     ).appendTo('#mixprovidernodes-list');
