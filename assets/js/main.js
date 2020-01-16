@@ -29,6 +29,7 @@ function updateMixNodes(mixNodes) {
     pk = node.pubKey;
     stripped = pk.replace('=', '');
     var $tr = $('<tr>').append(
+      $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.layer)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
@@ -45,6 +46,7 @@ function updateMixProviderNodes(mixProviderNodes) {
       clients[i] = c.pubKey;
     });
     var $tr = $('<tr>').append(
+      $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(clients))
@@ -55,6 +57,7 @@ function updateMixProviderNodes(mixProviderNodes) {
 function updateCocoNodes(cocoNodes) {
   $.each(cocoNodes, function(_, node) {
     var $tr = $('<tr>').append(
+      $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey))
     ).appendTo('#coconodes-list');
