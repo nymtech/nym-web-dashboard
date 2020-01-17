@@ -1,5 +1,5 @@
 function directoryUrl() {
-  if($(location).attr("href").startsWith("https://qa-dashboard")) {
+  if ($(location).attr("href").startsWith("https://qa-dashboard")) {
     return "qa-directory.nymtech.net";
   } else {
     return "directory.nymtech.net";
@@ -12,7 +12,7 @@ function getTopology() {
   $.ajax({
     type: 'GET',
     url: topologyUrl,
-    success: function(data) {
+    success: function (data) {
       updateDom(data);
     }
   });
@@ -25,7 +25,7 @@ function updateDom(data) {
 }
 
 function updateMixNodes(mixNodes) {
-  $.each(mixNodes, function(_, node) {
+  $.each(mixNodes, function (_, node) {
     pk = node.pubKey;
     stripped = pk.replace('=', '');
     var $tr = $('<tr>').append(
@@ -40,9 +40,9 @@ function updateMixNodes(mixNodes) {
 }
 
 function updateMixProviderNodes(mixProviderNodes) {
-  $.each(mixProviderNodes, function(_, node) {
+  $.each(mixProviderNodes, function (_, node) {
     var clients = [];
-    $.each(node.registeredClients, function(i, c) {
+    $.each(node.registeredClients, function (i, c) {
       clients[i] = c.pubKey;
     });
     var $tr = $('<tr>').append(
@@ -55,7 +55,7 @@ function updateMixProviderNodes(mixProviderNodes) {
 }
 
 function updateCocoNodes(cocoNodes) {
-  $.each(cocoNodes, function(_, node) {
+  $.each(cocoNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
@@ -70,12 +70,11 @@ function connectWebSocket() {
   url = "wss://" + directoryUrl() + "/ws";
   console.log("connecting to: " + url);
   conn = new WebSocket(url);
-  conn.onmessage = function(evt) {
+  conn.onmessage = function (evt) {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
       var msg = jQuery.parseJSON(messages[i]);
       var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-      $(recCell).html(DOMPurify.sanitize(msg.received));
 
       var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
       var sent = 0;
@@ -83,12 +82,17 @@ function connectWebSocket() {
         s = msg.sent[key];
         sent += s;
       }
-      $(sentCell).html(DOMPurify.sanitize(sent));
+
+      let newRecVal = DOMPurify.sanitize(msg.received).length > 0 ? DOMPurify.sanitize(msg.received) : "0";
+      let newSentVal = DOMPurify.sanitize(sent).length > 0 ? DOMPurify.sanitize(sent) : "0";
+
+      $(recCell).html(newRecVal);
+      $(sentCell).html(newSentVal);
     }
   };
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
   getTopology();
   connectWebSocket();
 });
