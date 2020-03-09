@@ -12,7 +12,7 @@ function getTopology() {
   $.ajax({
     type: 'GET',
     url: topologyUrl,
-    success: function(data) {
+    success: function (data) {
       updateDom(data);
     }
   });
