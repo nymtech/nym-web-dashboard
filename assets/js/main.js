@@ -29,6 +29,7 @@ function updateMixNodes(mixNodes) {
     pk = node.pubKey;
     stripped = pk.replace('=', '');
     var $tr = $('<tr>').append(
+      $('<input type="hidden" id="prev-timestamp-' + stripped + '" value="' + node.timestamp + '"> '),
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.layer)),
@@ -40,9 +41,9 @@ function updateMixNodes(mixNodes) {
 }
 
 function updateMixProviderNodes(mixProviderNodes) {
-  $.each(mixProviderNodes, function(_, node) {
+  $.each(mixProviderNodes, function (_, node) {
     var clients = [];
-    $.each(node.registeredClients, function(i, c) {
+    $.each(node.registeredClients, function (i, c) {
       clients[i] = c.pubKey;
     });
     var $tr = $('<tr>').append(
@@ -55,7 +56,7 @@ function updateMixProviderNodes(mixProviderNodes) {
 }
 
 function updateCocoNodes(cocoNodes) {
-  $.each(cocoNodes, function(_, node) {
+  $.each(cocoNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
@@ -70,12 +71,19 @@ function connectWebSocket() {
   url = "wss://" + directoryUrl() + "/ws";
   console.log("connecting to: " + url);
   conn = new WebSocket(url);
-  conn.onmessage = function(evt) {
+  conn.onmessage = function (evt) {
     var messages = evt.data.split('\n');
     for (var i = 0; i < messages.length; i++) {
       var msg = jQuery.parseJSON(messages[i]);
+
+      stripped = msg.pubKey.replace('=', '');
+      prevTimeStamp = ($("#prev-timestamp-" + stripped).val());
+
+      timeDiff = (msg.timestamp - prevTimeStamp) / 1000000000;
+      receivedPerSecond = Math.floor(msg.received / timeDiff);
+
       var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-      $(recCell).html(DOMPurify.sanitize(msg.received));
+      $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
 
       var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
       var sent = 0;
@@ -83,12 +91,15 @@ function connectWebSocket() {
         s = msg.sent[key];
         sent += s;
       }
-      $(sentCell).html(DOMPurify.sanitize(sent));
+      sentPerSecond = Math.floor(sent / timeDiff);
+
+      $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
+      $('#prev-timestamp-' + stripped).val(msg.timestamp);
     }
   };
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
   getTopology();
   connectWebSocket();
 });
