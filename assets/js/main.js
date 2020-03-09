@@ -1,5 +1,5 @@
 function directoryUrl() {
-  if($(location).attr("href").startsWith("https://qa-dashboard")) {
+  if ($(location).attr("href").startsWith("https://qa-dashboard")) {
     return "qa-directory.nymtech.net";
   } else {
     return "directory.nymtech.net";
@@ -95,6 +95,12 @@ function connectWebSocket() {
 
       $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
       $('#prev-timestamp-' + stripped).val(msg.timestamp);
+
+      let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
+      let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
+
+      $(recCell).html(newRecVal);
+      $(sentCell).html(newSentVal);
     }
   };
 }
