@@ -25,7 +25,7 @@ function updateDom(data) {
 }
 
 function updateMixNodes(mixNodes) {
-  $.each(mixNodes, function(_, node) {
+  $.each(mixNodes, function (_, node) {
     pk = node.pubKey;
     stripped = pk.replace('=', '');
     var $tr = $('<tr>').append(
