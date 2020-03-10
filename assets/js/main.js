@@ -72,37 +72,60 @@ function connectWebSocket() {
   console.log("connecting to: " + url);
   conn = new WebSocket(url);
   conn.onmessage = function (evt) {
-    var messages = evt.data.split('\n');
-    for (var i = 0; i < messages.length; i++) {
-      var msg = jQuery.parseJSON(messages[i]);
-
-      stripped = msg.pubKey.replace('=', '');
-      prevTimeStamp = ($("#prev-timestamp-" + stripped).val());
-
-      timeDiff = (msg.timestamp - prevTimeStamp) / 1000000000;
-      receivedPerSecond = Math.floor(msg.received / timeDiff);
-
-      var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-      $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
-
-      var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-      var sent = 0;
-      for (var key in msg.sent) {
-        s = msg.sent[key];
-        sent += s;
-      }
-      sentPerSecond = Math.floor(sent / timeDiff);
-
-      $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
-      $('#prev-timestamp-' + stripped).val(msg.timestamp);
-
-      let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
-      let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
-
-      $(recCell).html(newRecVal);
-      $(sentCell).html(newSentVal);
-    }
+    processMessage(evt);
   };
+}
+
+function processMessage(evt) {
+  var messages = evt.data.split('\n');
+  for (var i = 0; i < messages.length; i++) {
+    var msg = jQuery.parseJSON(messages[i]);
+
+    prevTimestamp = updateTimeStampStorage(msg);
+
+    timeDiff = (msg.timestamp - prevTimeStamp) / 1000000000;
+    receivedPerSecond = Math.floor(msg.received / timeDiff);
+    sentPerSecond = Math.floor(sent / timeDiff);
+
+    var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
+    $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
+
+    var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
+    var sent = 0;
+    for (var key in msg.sent) {
+      s = msg.sent[key];
+      sent += s;
+    }
+
+    $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
+
+    let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
+    let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
+
+    $(recCell).html(newRecVal);
+    $(sentCell).html(newSentVal);
+  }
+}
+
+/* 
+  Hahahaha this has to be the crappiest code I've written since learning to code.
+
+  On the upside, it'll save a few weeks messing with React or Angular to do
+  basically the same thing.
+*/
+function updateTimeStampStorage(msg) {
+  stripped = msg.pubKey.replace('=', '');
+  // get the timestamp stored during the last loop
+  prevTimeStamp = ($("#prev-timestamp-" + stripped).val())
+
+  // store the current timestamp
+  $('#prev-timestamp-' + stripped).val(msg.timestamp);
+
+  // return the previous timestamp
+  return prevTimeStamp;
+}
+
+function storeCurrentTimeStamp(timestamp) {
 }
 
 $(document).ready(function () {
