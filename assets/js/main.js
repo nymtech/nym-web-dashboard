@@ -13,18 +13,18 @@ function getTopology() {
     type: 'GET',
     url: topologyUrl,
     success: function (data) {
-      updateDom(data);
+      createDisplayTable(data);
     }
   });
 }
 
-function updateDom(data) {
-  updateMixNodes(data.mixNodes);
-  updateMixProviderNodes(data.mixProviderNodes);
-  updateCocoNodes(data.cocoNodes);
+function createDisplayTable(data) {
+  createMixnodeRows(data.mixNodes);
+  createProviderRows(data.mixProviderNodes);
+  createValidatorRows(data.cocoNodes);
 }
 
-function updateMixNodes(mixNodes) {
+function createMixnodeRows(mixNodes) {
   $.each(mixNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
@@ -38,7 +38,7 @@ function updateMixNodes(mixNodes) {
   });
 }
 
-function updateMixProviderNodes(mixProviderNodes) {
+function createProviderRows(mixProviderNodes) {
   $.each(mixProviderNodes, function (_, node) {
     var clients = [];
     $.each(node.registeredClients, function (i, c) {
@@ -53,7 +53,7 @@ function updateMixProviderNodes(mixProviderNodes) {
   });
 }
 
-function updateCocoNodes(cocoNodes) {
+function createValidatorRows(cocoNodes) {
   $.each(cocoNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
