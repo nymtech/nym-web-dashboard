@@ -26,16 +26,14 @@ function updateDom(data) {
 
 function updateMixNodes(mixNodes) {
   $.each(mixNodes, function (_, node) {
-    pk = node.pubKey;
-    stripped = pk.replace('=', '');
     var $tr = $('<tr>').append(
-      $('<input type="hidden" id="prev-timestamp-' + stripped + '" value="' + node.timestamp + '"> '),
+      $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.layer)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
-      $('<td id="' + "received-" + DOMPurify.sanitize(stripped) + '">').text("0"),
-      $('<td id="' + "sent-" + DOMPurify.sanitize(stripped) + '">').text("0")
+      $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
+      $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
     ).appendTo('#mixnodes-list');
   });
 }
@@ -84,27 +82,31 @@ function processMessage(evt) {
     prevTimestamp = updateTimeStampStorage(msg);
 
     timeDiff = (msg.timestamp - prevTimeStamp) / 1000000000;
-    receivedPerSecond = Math.floor(msg.received / timeDiff);
-    sentPerSecond = Math.floor(sent / timeDiff);
 
-    var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-    $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
-
-    var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey).replace('=', '');
-    var sent = 0;
-    for (var key in msg.sent) {
-      s = msg.sent[key];
-      sent += s;
-    }
-
-    $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
-
-    let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
-    let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
-
-    $(recCell).html(newRecVal);
-    $(sentCell).html(newSentVal);
+    displayReceivedPackets(msg, timeDiff);
+    displaySentPackets(msg, timeDiff);
   }
+}
+
+function displaySentPackets(msg, timeDiff) {
+  var sentCell = "#sent-" + DOMPurify.sanitize(msg.pubKey);
+  var sent = 0;
+  for (var key in msg.sent) {
+    s = msg.sent[key];
+    sent += s;
+  }
+  sentPerSecond = Math.floor(sent / timeDiff);
+  $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
+  let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
+  $(sentCell).html(newSentVal);
+}
+
+function displayReceivedPackets(msg, timeDiff) {
+  receivedPerSecond = Math.floor(msg.received / timeDiff);
+  var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey);
+  $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
+  let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
+  $(recCell).html(newRecVal);
 }
 
 /* 
@@ -114,18 +116,14 @@ function processMessage(evt) {
   basically the same thing.
 */
 function updateTimeStampStorage(msg) {
-  stripped = msg.pubKey.replace('=', '');
   // get the timestamp stored during the last loop
-  prevTimeStamp = ($("#prev-timestamp-" + stripped).val())
+  prevTimeStamp = ($("#prev-timestamp-" + msg.pubKey).val())
 
   // store the current timestamp
-  $('#prev-timestamp-' + stripped).val(msg.timestamp);
+  $('#prev-timestamp-' + msg.pubKey).val(msg.timestamp);
 
   // return the previous timestamp
   return prevTimeStamp;
-}
-
-function storeCurrentTimeStamp(timestamp) {
 }
 
 $(document).ready(function () {
