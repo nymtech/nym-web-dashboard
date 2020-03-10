@@ -96,17 +96,15 @@ function displaySentPackets(msg, timeDiff) {
     sent += s;
   }
   sentPerSecond = Math.floor(sent / timeDiff);
-  $(sentCell).html(DOMPurify.sanitize(sentPerSecond));
-  let newSentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
-  $(sentCell).html(newSentVal);
+  let sentVal = DOMPurify.sanitize(sentPerSecond).length > 0 ? DOMPurify.sanitize(sentPerSecond) : "0";
+  $(sentCell).html(sentVal);
 }
 
 function displayReceivedPackets(msg, timeDiff) {
   receivedPerSecond = Math.floor(msg.received / timeDiff);
   var recCell = "#received-" + DOMPurify.sanitize(msg.pubKey);
-  $(recCell).html(DOMPurify.sanitize(receivedPerSecond));
-  let newRecVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
-  $(recCell).html(newRecVal);
+  let recVal = DOMPurify.sanitize(receivedPerSecond).length > 0 ? DOMPurify.sanitize(receivedPerSecond) : "0";
+  $(recCell).html(recVal);
 }
 
 /* 
