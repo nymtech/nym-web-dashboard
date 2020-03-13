@@ -29,6 +29,7 @@ function createMixnodeRows(mixNodes) {
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
       $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.layer)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
@@ -46,6 +47,7 @@ function createProviderRows(mixProviderNodes) {
     });
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(clients))
@@ -57,6 +59,7 @@ function createValidatorRows(cocoNodes) {
   $.each(cocoNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey))
     ).appendTo('#coconodes-list');
