@@ -1,9 +1,11 @@
 function directoryUrl() {
-  if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
-    return "qa-directory.nymtech.net";
-  } else {
-    return "directory.nymtech.net";
-  }
+
+  // if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
+  //   return "qa-directory.nymtech.net";
+  // } else {
+  //   return "directory.nymtech.net";
+  // }
+  return "directory.nymtech.net";
 }
 
 function getTopology() {
@@ -25,6 +27,7 @@ function createDisplayTable(data) {
 }
 
 function createMixnodeRows(mixNodes) {
+  mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
   $.each(mixNodes, function (_, node) {
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
