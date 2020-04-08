@@ -1,11 +1,9 @@
 function directoryUrl() {
-
-  // if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
-  //   return "qa-directory.nymtech.net";
-  // } else {
-  //   return "directory.nymtech.net";
-  // }
-  return "directory.nymtech.net";
+  if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
+    return "qa-directory.nymtech.net";
+  } else {
+    return "directory.nymtech.net";
+  }
 }
 
 function getTopology() {
