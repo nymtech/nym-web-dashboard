@@ -1,6 +1,7 @@
 function directoryUrl() {
   if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
-    return "qa-directory.nymtech.net";
+    // return "qa-directory.nymtech.net";
+    return "directory.nymtech.net";
   } else {
     return "directory.nymtech.net";
   }
@@ -27,6 +28,8 @@ function createDisplayTable(data) {
 function createMixnodeRows(mixNodes) {
   mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
   $.each(mixNodes, function (_, node) {
+    cleanup(node);
+
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
       $('<td>').text(DOMPurify.sanitize(node.version)),
@@ -82,6 +85,7 @@ function processMessage(evt) {
   var messages = evt.data.split('\n');
   for (var i = 0; i < messages.length; i++) {
     var msg = jQuery.parseJSON(messages[i]);
+    cleanup(msg);
 
     prevTimestamp = updateTimeStampStorage(msg);
 
@@ -132,3 +136,14 @@ $(document).ready(function () {
   getTopology();
   connectWebSocket();
 });
+
+
+// msg.pubKey from old nodes (before 0.5.0ish ) are sent from the server with 
+// an '=' at the end, which breaks jQuery. 
+//
+// This cleans it up so we don't get console errors. We can remove this once 
+// those old nodes are gone. 
+function cleanup(msg) {
+  msg.pubKey = msg.pubKey.replace('=', '');
+  return msg;
+}
