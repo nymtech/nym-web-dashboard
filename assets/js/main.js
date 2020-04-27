@@ -22,6 +22,7 @@ function createDisplayTable(data) {
   createMixnodeRows(data.mixNodes);
   createProviderRows(data.mixProviderNodes);
   createValidatorRows(data.cocoNodes);
+  createGatewayRows(data.gateways);
 }
 
 function createMixnodeRows(mixNodes) {
@@ -55,6 +56,22 @@ function createProviderRows(mixProviderNodes) {
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(clients))
     ).appendTo('#mixprovidernodes-list');
+  });
+}
+
+function createGatewayRows(gatewayNodes) {
+  $.each(gatewayNodes, function (_, node) {
+    var clients = [];
+    $.each(node.registeredClients, function (i, c) {
+      clients[i] = c.pubKey;
+    });
+    var $tr = $('<tr>').append(
+      $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
+      $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
+      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
+      $('<td>').text(DOMPurify.sanitize(clients))
+    ).appendTo('#gatewaynodes-list');
   });
 }
 
