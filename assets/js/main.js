@@ -22,7 +22,7 @@ function createDisplayTable(data) {
   createMixnodeRows(data.mixNodes);
   createProviderRows(data.mixProviderNodes);
   createValidatorRows(data.cocoNodes);
-  createGatewayRows(data.gateways);
+  createGatewayRows(data.gatewayNodes);
 }
 
 function createMixnodeRows(mixNodes) {
