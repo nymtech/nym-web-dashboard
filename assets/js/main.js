@@ -1,6 +1,4 @@
 function directoryUrl() {
-  return "qa-directory.nymtech.net";
-
   if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
     return "qa-directory.nymtech.net";
   } else {
