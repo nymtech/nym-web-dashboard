@@ -61,10 +61,9 @@ function createProviderRows(mixProviderNodes) {
 
 function createGatewayRows(gatewayNodes) {
   $.each(gatewayNodes, function (_, node) {
-    var clients = [];
-    $.each(node.registeredClients, function (i, c) {
-      clients[i] = c.pubKey;
-    });
+    const numClients = node.registeredClients.length;
+    const clients = `${numClients} clients are currently registered here`;
+
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.location)),
