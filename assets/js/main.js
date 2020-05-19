@@ -1,4 +1,6 @@
 function directoryUrl() {
+  return "qa-directory.nymtech.net";
+
   if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
     return "qa-directory.nymtech.net";
   } else {
@@ -20,7 +22,6 @@ function getTopology() {
 
 function createDisplayTable(data) {
   createMixnodeRows(data.mixNodes);
-  createProviderRows(data.mixProviderNodes);
   createValidatorRows(data.cocoNodes);
   createGatewayRows(data.gatewayNodes);
 }
@@ -40,22 +41,6 @@ function createMixnodeRows(mixNodes) {
       $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
       $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
     ).appendTo('#mixnodes-list');
-  });
-}
-
-function createProviderRows(mixProviderNodes) {
-  $.each(mixProviderNodes, function (_, node) {
-    var clients = [];
-    $.each(node.registeredClients, function (i, c) {
-      clients[i] = c.pubKey;
-    });
-    var $tr = $('<tr>').append(
-      $('<td>').text(DOMPurify.sanitize(node.version)),
-      $('<td>').text(DOMPurify.sanitize(node.location)),
-      $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
-      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
-      $('<td>').text(DOMPurify.sanitize(clients))
-    ).appendTo('#mixprovidernodes-list');
   });
 }
 
