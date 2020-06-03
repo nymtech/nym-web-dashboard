@@ -18,6 +18,18 @@ function getTopology() {
   });
 }
 
+function getStandbyNodes() {
+  console.log("Checking for badnodes...");
+  var badNodesUrl = "http://" + directoryUrl() + "/api/presence/disallowed";
+  $.ajax({
+    type: 'GET',
+    url: badNodesUrl,
+    success: function (data) {
+      createStandbyNodeRows(data);
+    }
+  });
+}
+
 function createDisplayTable(data) {
   createMixnodeRows(data.mixNodes);
   createValidatorRows(data.cocoNodes);
@@ -39,6 +51,24 @@ function createMixnodeRows(mixNodes) {
       $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
       $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
     ).appendTo('#mixnodes-list');
+  });
+}
+
+function createStandbyNodeRows(mixNodes) {
+  mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
+  $.each(mixNodes, function (_, node) {
+    cleanup(node);
+
+    var $tr = $('<tr>').append(
+      $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
+      $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
+      $('<td>').text(DOMPurify.sanitize(node.host)),
+      $('<td>').text(DOMPurify.sanitize(node.layer)),
+      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
+      $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
+      $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
+    ).appendTo('#standby-list');
   });
 }
 
@@ -132,6 +162,7 @@ function updateTimeStampStorage(msg) {
 
 $(document).ready(function () {
   getTopology();
+  getStandbyNodes();
   connectWebSocket();
 });
 
