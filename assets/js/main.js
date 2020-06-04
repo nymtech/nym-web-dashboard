@@ -20,7 +20,7 @@ function getTopology() {
 
 function getStandbyNodes() {
   console.log("Checking for badnodes...");
-  var badNodesUrl = "http://" + directoryUrl() + "/api/presence/disallowed";
+  var badNodesUrl = "https://" + directoryUrl() + "/api/presence/disallowed";
   $.ajax({
     type: 'GET',
     url: badNodesUrl,
