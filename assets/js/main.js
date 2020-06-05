@@ -1,14 +1,26 @@
 function directoryUrl() {
-  if ($(location).attr("href").startsWith("https://qa-dashboard") || $(location).attr("href").startsWith("http://localhost")) {
-    return "qa-directory.nymtech.net";
+  if ($(location).attr("href").startsWith("http://localhost")) {
+    return "http://localhost:8080";
+  } else if ($(location).attr("href").startsWith("https://qa-dashboard")) {
+    return "https://qa-directory.nymtech.net";
   } else {
-    return "directory.nymtech.net";
+    return "https://directory.nymtech.net";
+  }
+}
+
+function websocketUrl() {
+  if ($(location).attr("href").startsWith("http://localhost")) {
+    return "ws://127.0.0.1";
+  } else if ($(location).attr("href").startsWith("https://qa-dashboard")) {
+    return "wss://qa-directory.nymtech.net";
+  } else {
+    return "wss://directory.nymtech.net";
   }
 }
 
 function getTopology() {
   console.log("Getting topology...");
-  var topologyUrl = "https://" + directoryUrl() + "/api/presence/topology";
+  var topologyUrl = directoryUrl() + "/api/presence/topology";
   $.ajax({
     type: 'GET',
     url: topologyUrl,
@@ -20,7 +32,7 @@ function getTopology() {
 
 function getStandbyNodes() {
   console.log("Checking for badnodes...");
-  var badNodesUrl = "http://" + directoryUrl() + "/api/presence/disallowed";
+  var badNodesUrl = directoryUrl() + "/api/presence/disallowed";
   $.ajax({
     type: 'GET',
     url: badNodesUrl,
@@ -101,7 +113,7 @@ function createValidatorRows(cocoNodes) {
 function connectWebSocket() {
   var conn;
   var url;
-  url = "wss://" + directoryUrl() + "/ws";
+  url = websocketUrl + "/ws";
   console.log("connecting to: " + url);
   conn = new WebSocket(url);
   conn.onmessage = function (evt) {
