@@ -86,15 +86,11 @@ function createStandbyNodeRows(mixNodes) {
 
 function createGatewayRows(gatewayNodes) {
   $.each(gatewayNodes, function (_, node) {
-    const numClients = node.registeredClients.length;
-    const clients = `${numClients} clients are currently registered here`;
-
     var $tr = $('<tr>').append(
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.pubKey)),
-      $('<td>').text(DOMPurify.sanitize(clients))
     ).appendTo('#gatewaynodes-list');
   });
 }
