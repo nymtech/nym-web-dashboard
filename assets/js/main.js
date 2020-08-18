@@ -109,7 +109,7 @@ function createValidatorRows(cocoNodes) {
 function connectWebSocket() {
   var conn;
   var url;
-  url = websocketUrl + "/ws";
+  url = websocketUrl() + "/ws";
   console.log("connecting to: " + url);
   conn = new WebSocket(url);
   conn.onmessage = function (evt) {
