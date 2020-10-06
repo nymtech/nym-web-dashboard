@@ -48,6 +48,83 @@ function createDisplayTable(data) {
   createGatewayRows(data.gatewayNodes);
 }
 
+function clearStatus(element) {
+  element.removeAttribute("active")
+  element.removeAttribute("positive")
+  element.removeAttribute("intermediary")
+  element.removeAttribute("negative")
+}
+
+function setNodeStatus(pubKey, reportData) {
+  let dotWrapper = document.getElementById(`dotWrapper${pubKey}`);
+  let statusIndicator = dotWrapper.children[0];
+  clearStatus(statusIndicator)
+
+  if (reportData.mostRecentIPV4 && reportData.mostRecentIPV6 && reportData.lastHourIPV4 > 50 && reportData.lastHourIPV6 > 50) {
+    statusIndicator.setAttribute("positive", "")
+  } else if (reportData.mostRecentIPV4 || reportData.mostRecentIPV6) {
+    statusIndicator.setAttribute("intermediary", "")
+  } else {
+    statusIndicator.setAttribute("negative", "")
+  }
+
+  let newTooltip = `\n
+  IPv4 routable: ${reportData.mostRecentIPV4}\n
+  Last hour IPv4: ${reportData.lastHourIPV4}%\n
+  IPv6 routable: ${reportData.mostRecentIPV6}\n
+  Last hour IPv6: ${reportData.lastHourIPV6}%\n
+  `
+  dotWrapper.setAttribute("title", newTooltip)
+}
+
+function updateNodesStatus() {
+  console.log("updating node statuses!")
+  const topologyUrl = directoryUrl() + "/api/presence/topology";
+  $.ajax({
+    type: 'GET',
+    url: topologyUrl,
+    success: (data) => {
+      data.mixNodes.forEach(node => {
+        const reportURL = directoryUrl() + `/api/mixmining/${node.pubKey}/report`;
+        $.ajax({
+          type: 'GET',
+          url: reportURL,
+          success: (reportData) => {
+            setNodeStatus(node.pubKey, reportData)
+          }
+        });
+      });
+    }
+  });
+
+}
+
+function makeStatusDot(nodePubKey) {
+  let statusText = "pending..."
+
+  let dotWrapper = document.createElement("div");
+  dotWrapper.setAttribute('id', `dotWrapper${nodePubKey}`)
+  dotWrapper.setAttribute('style', 'text-align: center')
+  dotWrapper.setAttribute('data-toggle', 'tooltip')
+  dotWrapper.setAttribute('data-placement', 'right')
+  dotWrapper.setAttribute('title', statusText)
+
+  let dot = document.createElement("status-indicator");
+  dotWrapper.appendChild(dot);
+
+  return dotWrapper;
+}
+
+function setGatewayStatusDot(nodePubKey) {
+  let statusText = "Data not available..."
+  let dotWrapper = document.getElementById(`dotWrapper${nodePubKey}`);
+  let statusIndicator = dotWrapper.children[0];
+  clearStatus(statusIndicator);
+  statusIndicator.setAttribute("active", "")
+
+  dotWrapper.setAttribute("title", statusText)
+}
+
 function createMixnodeRows(mixNodes) {
   mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
   $.each(mixNodes, function (_, node) {
@@ -55,6 +132,7 @@ function createMixnodeRows(mixNodes) {
 
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
+      $('<td>').html(makeStatusDot(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.host)),
@@ -87,12 +165,14 @@ function createStandbyNodeRows(mixNodes) {
 function createGatewayRows(gatewayNodes) {
   $.each(gatewayNodes, function (_, node) {
     var $tr = $('<tr>').append(
+      $('<td>').html(makeStatusDot(node.pubKey)),
       $('<td>').text(DOMPurify.sanitize(node.version)),
       $('<td>').text(DOMPurify.sanitize(node.location)),
       $('<td>').text(DOMPurify.sanitize(node.clientListener)),
       $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.identityKey)),
     ).appendTo('#gatewaynodes-list');
+    setGatewayStatusDot(node.pubKey);
   });
 }
 
@@ -170,9 +250,12 @@ function updateTimeStampStorage(msg) {
 }
 
 $(document).ready(function () {
+  // update every minute
+  setInterval(updateNodesStatus, 60000);
   getTopology();
   getStandbyNodes();
   connectWebSocket();
+  updateNodesStatus();
 });
 
 
