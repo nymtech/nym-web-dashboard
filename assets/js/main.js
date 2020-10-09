@@ -26,6 +26,7 @@ function getTopology() {
     url: topologyUrl,
     success: function (data) {
       createDisplayTable(data);
+      updateNodesStatus();
     }
   });
 }
@@ -55,10 +56,15 @@ function clearStatus(element) {
   element.removeAttribute("negative")
 }
 
-function setNodeStatus(pubKey, reportData) {
-  let dotWrapper = document.getElementById(`dotWrapper${pubKey}`);
+function setNodeStatus(dotWrapper, reportData) {
   let statusIndicator = dotWrapper.children[0];
   clearStatus(statusIndicator)
+
+  if (reportData == undefined || reportData == null) {
+    dotWrapper.setAttribute("title", "no data available")
+    return
+  }
+
 
   if (reportData.mostRecentIPV4 && reportData.mostRecentIPV6 && reportData.lastHourIPV4 > 50 && reportData.lastHourIPV6 > 50) {
     statusIndicator.setAttribute("positive", "")
@@ -77,26 +83,30 @@ function setNodeStatus(pubKey, reportData) {
   dotWrapper.setAttribute("title", newTooltip)
 }
 
+function dealWithStatusReport(report) {
+  let reportMap = new Map();
+  report.forEach(reportData => {
+    reportMap.set(reportData.pubKey, reportData)
+  })
+
+  let allWrappers = document.getElementsByClassName('statusDot');
+  for (let statusWrapper of allWrappers) {
+    let mapEntry = reportMap.get(statusWrapper.getAttribute('pubkey'))
+    setNodeStatus(statusWrapper, mapEntry)
+  }
+}
+
 function updateNodesStatus() {
   console.log("updating node statuses!")
-  const topologyUrl = directoryUrl() + "/api/presence/topology";
-  $.ajax({
-    type: 'GET',
-    url: topologyUrl,
-    success: (data) => {
-      data.mixNodes.forEach(node => {
-        const reportURL = directoryUrl() + `/api/mixmining/${node.pubKey}/report`;
-        $.ajax({
-          type: 'GET',
-          url: reportURL,
-          success: (reportData) => {
-            setNodeStatus(node.pubKey, reportData)
-          }
-        });
-      });
-    }
-  });
 
+  const reportUrl = directoryUrl() + "/api/mixmining/fullreport";
+  fetch(reportUrl, {
+    method: 'GET'
+  })
+    .then((response) => response.json())
+    .then((data) => dealWithStatusReport(data.report)).catch((err) => {
+      console.log("getting full mixmining report failed - ", err)
+    })
 }
 
 function makeStatusDot(nodePubKey) {
@@ -104,10 +114,12 @@ function makeStatusDot(nodePubKey) {
 
   let dotWrapper = document.createElement("div");
   dotWrapper.setAttribute('id', `dotWrapper${nodePubKey}`)
+  dotWrapper.setAttribute('pubkey', nodePubKey)
   dotWrapper.setAttribute('style', 'text-align: center')
   dotWrapper.setAttribute('data-toggle', 'tooltip')
   dotWrapper.setAttribute('data-placement', 'right')
   dotWrapper.setAttribute('title', statusText)
+  dotWrapper.classList.add('statusDot')
 
   let dot = document.createElement("status-indicator");
   dotWrapper.appendChild(dot);
@@ -118,6 +130,7 @@ function makeStatusDot(nodePubKey) {
 function setGatewayStatusDot(nodePubKey) {
   let statusText = "Data not available..."
   let dotWrapper = document.getElementById(`dotWrapper${nodePubKey}`);
+  dotWrapper.classList.remove('statusDot')
   let statusIndicator = dotWrapper.children[0];
   clearStatus(statusIndicator);
   statusIndicator.setAttribute("active", "")
@@ -249,14 +262,15 @@ function updateTimeStampStorage(msg) {
   return prevTimeStamp;
 }
 
-$(document).ready(function () {
+
+document.addEventListener("DOMContentLoaded", function () {
   // update every minute
   setInterval(updateNodesStatus, 60000);
   getTopology();
   getStandbyNodes();
   connectWebSocket();
-  updateNodesStatus();
 });
+
 
 
 // msg.pubKey from old nodes (before 0.5.0ish ) are sent from the server with 
