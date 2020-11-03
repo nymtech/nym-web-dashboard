@@ -1,6 +1,6 @@
 function directoryUrl() {
   if ($(location).attr("href").startsWith("http://localhost")) {
-    return "http://localhost:8080";
+    return "http://localhost:8081";
   } else if ($(location).attr("href").startsWith("https://qa-dashboard")) {
     return "https://qa-directory.nymtech.net";
   } else {
@@ -10,17 +10,17 @@ function directoryUrl() {
 
 function websocketUrl() {
   if ($(location).attr("href").startsWith("http://localhost")) {
-    return "ws://127.0.0.1";
+    return "ws://localhost:8080";
   } else if ($(location).attr("href").startsWith("https://qa-dashboard")) {
-    return "wss://qa-directory.nymtech.net";
+    return "wss://qa-metrics.nymtech.net";
   } else {
-    return "wss://directory.nymtech.net";
+    return "wss://metrics.nymtech.net";
   }
 }
 
 function getTopology() {
   console.log("Getting topology...");
-  var topologyUrl = directoryUrl() + "/api/presence/topology";
+  var topologyUrl = directoryUrl() + "/api/mixmining/topology";
   $.ajax({
     type: 'GET',
     url: topologyUrl,
@@ -31,22 +31,10 @@ function getTopology() {
   });
 }
 
-function getStandbyNodes() {
-  console.log("Checking for badnodes...");
-  var badNodesUrl = directoryUrl() + "/api/presence/disallowed";
-  $.ajax({
-    type: 'GET',
-    url: badNodesUrl,
-    success: function (data) {
-      createStandbyNodeRows(data);
-    }
-  });
-}
-
 function createDisplayTable(data) {
   createMixnodeRows(data.mixNodes);
   createValidatorRows(data.cocoNodes);
-  createGatewayRows(data.gatewayNodes);
+  createGatewayRows(data.gateways);
 }
 
 function clearStatus(element) {
@@ -138,55 +126,73 @@ function setGatewayStatusDot(nodePubKey) {
   dotWrapper.setAttribute("title", statusText)
 }
 
-function createMixnodeRows(mixNodes) {
-  mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
-  $.each(mixNodes, function (_, node) {
-    cleanup(node);
+function compareNodes(node1, node2) {
+  if (node1.reputation < node2.reputation) {
+    return 1
+  } else if (node1.reputation > node2.reputation) {
+    return -1
+  } else {
+    if (node1.version < node2.version) {
+      return 1
+    } else if (node1.version > node2.version) {
+      return -1
+    } else {
+      if (node1.layer < node2.layer) {
+        return 1
+      } else {
+        return -1
+      }
+    }
+  }
 
-    var $tr = $('<tr>').append(
-      $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
-      $('<td>').html(makeStatusDot(node.pubKey)),
-      $('<td>').text(DOMPurify.sanitize(node.version)),
-      $('<td>').text(DOMPurify.sanitize(node.location)),
-      $('<td>').text(DOMPurify.sanitize(node.host)),
-      $('<td>').text(DOMPurify.sanitize(node.layer)),
-      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
-      $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
-      $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
-    ).appendTo('#mixnodes-list');
-  });
 }
 
-function createStandbyNodeRows(mixNodes) {
-  mixNodes.sort((a, b) => a.version < b.version ? 1 : (a.version === b.version) ? ((a.layer > b.layer) ? 1 : -1) : -1);
-  $.each(mixNodes, function (_, node) {
-    cleanup(node);
+function createMixnodeRows(mixNodes) {
+  mixNodes.sort(compareNodes)
 
+  mixNodes.forEach(node => {
+    // because javascript works in mysterious ways, if you sanitize "0", it will return ""
+    let purifiedRep = DOMPurify.sanitize(node.reputation)
+    if (purifiedRep.length === 0) {
+      purifiedRep = 0
+    }
     var $tr = $('<tr>').append(
       $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
+      $('<td>').html(makeStatusDot(node.identityKey)),
+      $('<td>').text(purifiedRep),
       $('<td>').text(DOMPurify.sanitize(node.version)),
+      $('<td>').text(DOMPurify.sanitize(node.identityKey)),
+      $('<td>').text(DOMPurify.sanitize(node.sphinxKey)),
       $('<td>').text(DOMPurify.sanitize(node.location)),
-      $('<td>').text(DOMPurify.sanitize(node.host)),
+      $('<td>').text(DOMPurify.sanitize(node.mixHost)),
       $('<td>').text(DOMPurify.sanitize(node.layer)),
-      $('<td>').text(DOMPurify.sanitize(node.pubKey)),
-      $('<td id="' + "received-" + DOMPurify.sanitize(node.pubKey) + '">').text("0"),
-      $('<td id="' + "sent-" + DOMPurify.sanitize(node.pubKey) + '">').text("0")
-    ).appendTo('#standby-list');
-  });
+      $('<td id="' + "received-" + DOMPurify.sanitize(node.identityKey) + '">').text("0"),
+      $('<td id="' + "sent-" + DOMPurify.sanitize(node.identityKey) + '">').text("0")
+    ).appendTo('#mixnodes-list');
+  })
 }
 
 function createGatewayRows(gatewayNodes) {
-  $.each(gatewayNodes, function (_, node) {
+  gatewayNodes.forEach(node => {
+    // because javascript works in mysterious ways, if you sanitize "0", it will return ""
+    let purifiedRep = DOMPurify.sanitize(node.reputation)
+    if (purifiedRep.length === 0) {
+      purifiedRep = 0
+    }
     var $tr = $('<tr>').append(
-      $('<td>').html(makeStatusDot(node.pubKey)),
+      $('<input type="hidden" id="prev-timestamp-' + node.pubKey + '" value="' + node.timestamp + '"> '),
+      $('<td>').html(makeStatusDot(node.identityKey)),
+      $('<td>').text(purifiedRep),
       $('<td>').text(DOMPurify.sanitize(node.version)),
-      $('<td>').text(DOMPurify.sanitize(node.location)),
-      $('<td>').text(DOMPurify.sanitize(node.clientListener)),
-      $('<td>').text(DOMPurify.sanitize(node.mixnetListener)),
       $('<td>').text(DOMPurify.sanitize(node.identityKey)),
+      $('<td>').text(DOMPurify.sanitize(node.sphinxKey)),
+      $('<td>').text(DOMPurify.sanitize(node.location)),
+      $('<td>').text(DOMPurify.sanitize(node.mixHost)),
+      $('<td>').text(DOMPurify.sanitize(node.clientsHost)),
     ).appendTo('#gatewaynodes-list');
-    setGatewayStatusDot(node.pubKey);
-  });
+
+    setGatewayStatusDot(node.identityKey);
+  })
 }
 
 function createValidatorRows(cocoNodes) {
@@ -267,18 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // update every minute
   setInterval(updateNodesStatus, 60000);
   getTopology();
-  getStandbyNodes();
   connectWebSocket();
 });
 
-
-
-// msg.pubKey from old nodes (before 0.5.0ish ) are sent from the server with 
-// an '=' at the end, which breaks jQuery. 
-//
-// This cleans it up so we don't get console errors. We can remove this once 
-// those old nodes are gone. 
-function cleanup(msg) {
-  msg.pubKey = msg.pubKey.replace('=', '');
-  return msg;
-}
