@@ -25,6 +25,7 @@ function getTopology() {
     type: 'GET',
     url: topologyUrl,
     success: function (data) {
+      createMixnodeCount(data.mixNodes.length);
       createDisplayTable(data);
       updateNodesStatus();
     }
@@ -136,6 +137,10 @@ function setGatewayStatusDot(nodePubKey) {
   statusIndicator.setAttribute("active", "")
 
   dotWrapper.setAttribute("title", statusText)
+}
+
+function createMixnodeCount(mixNodeCount) {
+  var $h2 = $('h2').text(DOMPurify.sanitize(mixNodeCount)).appendTo("mixnodes-count");
 }
 
 function createMixnodeRows(mixNodes) {
