@@ -2,9 +2,9 @@ function directoryUrl() {
   if ($(location).attr("href").startsWith("http://localhost")) {
     return "http://localhost:8081";
   } else if ($(location).attr("href").startsWith("https://qa-dashboard")) {
-    return "https://qa-directory.nymtech.net";
+    return "http://qa-validator.nymtech.net:8081";
   } else {
-    return "https://directory.nymtech.net";
+    return "http://validator.nymtech.net:8081";
   }
 }
 
@@ -221,8 +221,6 @@ function processMessage(evt) {
   var messages = evt.data.split('\n');
   for (var i = 0; i < messages.length; i++) {
     var msg = jQuery.parseJSON(messages[i]);
-    cleanup(msg);
-
     prevTimestamp = updateTimeStampStorage(msg);
 
     timeDiff = (msg.timestamp - prevTimeStamp) / 1000000000;
