@@ -53,4 +53,10 @@ th {
     background-color: var(--status-indicator-color-negative);
     animation-name: status-indicator-pulse-negative;
   }
+
+  #mixnodes-count > h2 {
+    color: #51cbce;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
   
